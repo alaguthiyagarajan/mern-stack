@@ -9,7 +9,7 @@ const User = require('./models/User');
 const multer = require('multer');
 const app = express();
 app.use(express.json());
-app.use(cors({ credentials: true, origin: "http://localhost:3000" })); // Adjust frontend URL
+app.use(cors({ credentials: true, origin: "https://mern-stack-frontend-beryl.vercel.app" })); // Adjust frontend URL
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
