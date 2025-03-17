@@ -20,12 +20,15 @@ app.use((req, res, next) => {
 app.use('/uploads', express.static('uploads'));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("Connected to MongoDB"))
-    .catch(err => {
-        console.error("MongoDB Connection Error:", err);
-        process.exit(1);
-    });
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log("✅ Connected to MongoDB"))
+.catch(err => {
+    console.error("❌ MongoDB Connection Error:", err.message);
+});
+
 
 // Multer for File Uploads
 const storage = multer.diskStorage({
@@ -39,6 +42,26 @@ app.post('/register', upload.single('photo'), async (req, res) => {
     try {
         const { name, age, std, className, fatherName, password, confirmPassword } = req.body;
         if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' });
+
+        const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+    } else {
+        cb(new Error("Only image files are allowed!"), false);
+    }
+};
+
+const upload = multer({ 
+    storage,
+    fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB max file size
+});
+
 
         const existingUser = await User.findOne({ name, fatherName });
         if (existingUser) return res.status(400).json({ error: 'User already exists' });
