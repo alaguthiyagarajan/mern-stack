@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: "https://mern-stack-frontend-beryl.vercel.app",
+    origin: "http://localhost:3000",
     credentials: true,
     methods: "GET, POST, PUT, DELETE",
     allowedHeaders: ["Content-Type", "Authorization"]
