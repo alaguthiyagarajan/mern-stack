@@ -11,27 +11,15 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ credentials: true, origin: "https://mern-stack-frontend-beryl.vercel.app" }));
-
-// Ensure CORS headers are applied correctly
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "https://mern-stack-frontend-beryl.vercel.app");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-});
-
 app.use('/uploads', express.static('uploads'));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log("Connected to MongoDB"))
-.catch(err => {
-    console.error("MongoDB Connection Error:", err);
-    process.exit(1);
-});
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("Connected to MongoDB"))
+    .catch(err => {
+        console.error("MongoDB Connection Error:", err);
+        process.exit(1);
+    });
 
 // Multer for File Uploads
 const storage = multer.diskStorage({
@@ -50,7 +38,7 @@ app.post('/register', upload.single('photo'), async (req, res) => {
         if (existingUser) return res.status(400).json({ error: 'User already exists' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const photoPath = req.file?.path || '';
+        const photoPath = req.file ? req.file.path : '';
 
         const newUser = new User({ name, age, std, className, fatherName, password: hashedPassword, photo: photoPath });
         await newUser.save();
@@ -60,7 +48,7 @@ app.post('/register', upload.single('photo'), async (req, res) => {
     }
 });
 
-// Fix GET "/" Route Syntax
+// GET "/" Route
 app.get("/", (req, res) => {
     res.json("hello");
 });
@@ -81,7 +69,6 @@ app.post("/add-marks", async (req, res) => {
 
         res.json({ message: "Marks added successfully" });
     } catch (error) {
-        console.error("Error in /add-marks:", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -99,7 +86,6 @@ app.post("/update-marks", async (req, res) => {
         await user.save();
         res.json({ message: "Marks updated successfully", marks: user.marks });
     } catch (error) {
-        console.error("Marks Update Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
@@ -124,7 +110,6 @@ app.post("/login", async (req, res) => {
             photo: user.photo
         });
     } catch (error) {
-        console.error("Login API Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
