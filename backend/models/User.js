@@ -19,11 +19,5 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
-// 🔥 Drop the unique index on userId if it exists
-User.collection.dropIndex("userId_1").catch((err) => {
-    if (err.code !== 27) { // Code 27 means index doesn't exist
-        console.error("Error dropping userId index:", err);
-    }
-});
-
 module.exports = User;
+
