@@ -59,7 +59,9 @@ app.post('/register', upload.single('photo'), async (req, res) => {
     }
 });
 
-
+app.get("/"(req,res)=>{
+    res.json("hello");
+});
 
 app.post("/add-marks", async (req, res) => {
     try {
