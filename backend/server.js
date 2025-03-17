@@ -12,6 +12,7 @@ app.use(express.json());
 app.use(cors({ credentials: true, origin: "https://mern-stack-frontend-beryl.vercel.app" })); // Adjust frontend URL
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
+app.use(cors());
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
