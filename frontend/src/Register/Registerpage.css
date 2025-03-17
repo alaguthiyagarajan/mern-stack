@@ -1,0 +1,102 @@
+.body1 {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    margin: 0;
+    padding: 20px;
+}
+
+.register-container {
+    background: #ffffff;
+    padding: 30px;
+    width: 420px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.register-heading {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.register-table {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.register-table td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.form-label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #444;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.form-input {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.form-input:focus {
+    border-color: #6a11cb;
+    outline: none;
+}
+
+.register-btn,
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease-in-out, transform 0.2s;
+}
+
+.register-btn {
+    background: #28a745;
+    color: white;
+}
+
+.register-btn:hover {
+    background: #218838;
+    transform: scale(1.05);
+}
+
+.login-btn {
+    background: #007bff;
+    color: white;
+}
+
+.login-btn:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.file-input {
+    border: none;
+    padding: 5px;
+}
+
+@media (max-width: 768px) {
+    .register-container {
+        width: 90%;
+        padding: 20px;
+    }
+}
