@@ -17,6 +17,9 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+app.options('*', cors()); // Allow all preflight requests
+
+
 app.use('/uploads', express.static('uploads'));
 
 // MongoDB Connection
@@ -30,20 +33,7 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 
-// Multer for File Uploads
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-});
-const upload = multer({ storage });
-
-// Register Route
-app.post('/register', upload.single('photo'), async (req, res) => {
-    try {
-        const { name, age, std, className, fatherName, password, confirmPassword } = req.body;
-        if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' });
-
-        const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
@@ -62,6 +52,11 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB max file size
 });
 
+// Register Route
+app.post('/register', upload.single('photo'), async (req, res) => {
+    try {
+        const { name, age, std, className, fatherName, password, confirmPassword } = req.body;
+        if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' })
 
         const existingUser = await User.findOne({ name, fatherName });
         if (existingUser) return res.status(400).json({ error: 'User already exists' });
@@ -123,13 +118,15 @@ app.post("/update-marks", async (req, res) => {
 app.post("/login", async (req, res) => {
     try {
         const { name, password } = req.body;
+        if (!name || !password) return res.status(400).json({ error: "Name and Password are required" });
+
         const user = await User.findOne({ name });
-        if (!user) return res.status(401).json({ error: "User not found" });
+        if (!user) return res.status(404).json({ error: "User not found" });
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) return res.status(401).json({ error: "Invalid credentials" });
 
-        res.json({
+        res.status(200).json({
             name: user.name,
             age: user.age,
             className: user.className,
@@ -139,9 +136,10 @@ app.post("/login", async (req, res) => {
             photo: user.photo
         });
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: error.message });
     }
 });
+
 
 // Start Server
 const PORT = process.env.PORT || 5000;
