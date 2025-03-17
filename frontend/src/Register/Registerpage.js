@@ -36,7 +36,7 @@ const Register = () => {
         formData.append('photo', photo);
     
         try {
-            await axios.post('http://localhost:5000/register', formData, {
+            await axios.post('mern-stack-api-beta.vercel.app/register', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             alert('Registration Successful');
