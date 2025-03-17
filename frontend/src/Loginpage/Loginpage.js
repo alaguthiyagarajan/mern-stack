@@ -16,11 +16,11 @@ const Login = () => {
     });
     const [percentage, setPercentage] = useState(0);
     const navigate = useNavigate();
-
+    axios.default.widthCredantials=true;
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("mern-stack-api-beta.vercel.app/login", { name, password });
+            const response = await axios.post("https://mern-stack-api-beta.vercel.app//login", { name, password });
             if (!response.data || !response.data.name) {
                 alert("Login successful, but user data is missing!");
                 return;
