@@ -2,88 +2,79 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const User = require('./models/User');
 const multer = require('multer');
+const User = require('./models/User');
+
 const app = express();
 app.use(express.json());
-app.use(cors({ credentials: true, origin: "https://mern-stack-frontend-beryl.vercel.app" })); // Adjust frontend URL
 app.use(cookieParser());
+app.use(cors({ credentials: true, origin: "https://mern-stack-frontend-beryl.vercel.app" }));
+
+// Ensure CORS headers are applied correctly
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "https://mern-stack-frontend-beryl.vercel.app");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    next();
+});
+
 app.use('/uploads', express.static('uploads'));
-app.use(cors());
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(async () => {
-    console.log("Connected to MongoDB");
-   
-}).catch(err => console.error("MongoDB Connection Error:", err));
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');  // Save files in the "uploads" folder
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);  // Unique file name
-    }
+.then(() => console.log("Connected to MongoDB"))
+.catch(err => {
+    console.error("MongoDB Connection Error:", err);
+    process.exit(1);
 });
 
+// Multer for File Uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
 const upload = multer({ storage });
 
 // Register Route
 app.post('/register', upload.single('photo'), async (req, res) => {
     try {
         const { name, age, std, className, fatherName, password, confirmPassword } = req.body;
+        if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' });
 
-        if (password !== confirmPassword) {
-            return res.status(400).json({ error: 'Passwords do not match' });
-        }
-
-        const existingUser = await User.findOne({ name, fatherName }); // Check for duplicate names instead
-        if (existingUser) {
-            return res.status(400).json({ error: 'User already exists' });
-        }
+        const existingUser = await User.findOne({ name, fatherName });
+        if (existingUser) return res.status(400).json({ error: 'User already exists' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const photoPath = req.file ? req.file.path : '';
+        const photoPath = req.file?.path || '';
 
         const newUser = new User({ name, age, std, className, fatherName, password: hashedPassword, photo: photoPath });
         await newUser.save();
-
         res.json({ message: 'User Registered Successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-app.get("/"(req,res)=>{
+// Fix GET "/" Route Syntax
+app.get("/", (req, res) => {
     res.json("hello");
 });
 
+// Add Marks Route
 app.post("/add-marks", async (req, res) => {
     try {
-        console.log("Received request:", req.body); // Debugging
-
         const { userId, marks } = req.body;
+        if (!userId || !marks) return res.status(400).json({ error: "User ID and marks are required" });
 
-        // Ensure userId and marks are present
-        if (!userId || !marks) {
-            return res.status(400).json({ error: "User ID and marks are required" });
-        }
-
-        // Validate if userId is a valid ObjectId
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).json({ error: "Invalid User ID format" });
-        }
+        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ error: "Invalid User ID format" });
 
         const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+        if (!user) return res.status(404).json({ error: "User not found" });
 
         user.marks = marks;
         await user.save();
@@ -95,44 +86,33 @@ app.post("/add-marks", async (req, res) => {
     }
 });
 
+// Update Marks Route
 app.post("/update-marks", async (req, res) => {
     try {
         const { name, fatherName, marks } = req.body;
-
-        if (!name || !fatherName) {
-            return res.status(400).json({ error: "Name and Father's Name are required" });
-        }
+        if (!name || !fatherName) return res.status(400).json({ error: "Name and Father's Name are required" });
 
         const user = await User.findOne({ name, fatherName });
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+        if (!user) return res.status(404).json({ error: "User not found" });
 
         user.marks = marks;
         await user.save();
         res.json({ message: "Marks updated successfully", marks: user.marks });
     } catch (error) {
-        console.error("🔴 Marks Update Error:", error);
+        console.error("Marks Update Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
-
-
-
+// Login Route
 app.post("/login", async (req, res) => {
     try {
         const { name, password } = req.body;
         const user = await User.findOne({ name });
-
-        if (!user) {
-            return res.status(401).json({ error: "User not found" });
-        }
+        if (!user) return res.status(401).json({ error: "User not found" });
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
+        if (!isPasswordValid) return res.status(401).json({ error: "Invalid credentials" });
 
         res.json({
             name: user.name,
@@ -140,7 +120,7 @@ app.post("/login", async (req, res) => {
             className: user.className,
             fatherName: user.fatherName,
             std: user.std,
-            marks: user.marks || {}, // Ensure marks are always returned
+            marks: user.marks || {}, 
             photo: user.photo
         });
     } catch (error) {
@@ -148,14 +128,6 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
-
-
-
-
-
-
-
 
 // Start Server
 const PORT = process.env.PORT || 5000;
