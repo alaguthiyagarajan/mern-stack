@@ -83,7 +83,7 @@ const Register = () => {
                         </tr>
                         <tr>
                             <td className="form-label">Photo:</td>
-                            <td><input type="file" className="form-input file-input" onChange={(e) => setPhoto(e.target.files[0])} required /></td>
+                            <td><input type="file" className="form-input file-input" onChange={(e) => setPhoto(e.target.files[0])} /></td>
                         </tr>
                     </tbody>
                 </table>
