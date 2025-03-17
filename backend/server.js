@@ -55,22 +55,36 @@ const upload = multer({
 // Register Route
 app.post('/register', upload.single('photo'), async (req, res) => {
     try {
+        console.log("📌 Register API Hit");
+
         const { name, age, std, className, fatherName, password, confirmPassword } = req.body;
-        if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' })
+        console.log("📌 Received Data:", req.body);
+
+        if (password !== confirmPassword) {
+            console.log("❌ Passwords do not match");
+            return res.status(400).json({ error: 'Passwords do not match' });
+        }
 
         const existingUser = await User.findOne({ name, fatherName });
-        if (existingUser) return res.status(400).json({ error: 'User already exists' });
+        if (existingUser) {
+            console.log("❌ User already exists");
+            return res.status(400).json({ error: 'User already exists' });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const photoPath = req.file ? req.file.path : '';
 
         const newUser = new User({ name, age, std, className, fatherName, password: hashedPassword, photo: photoPath });
         await newUser.save();
+
+        console.log("✅ User Registered Successfully");
         res.json({ message: 'User Registered Successfully' });
     } catch (error) {
+        console.error("❌ Error in /register:", error.message);
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // GET "/" Route
 app.get("/", (req, res) => {
