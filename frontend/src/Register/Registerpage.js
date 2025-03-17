@@ -13,7 +13,7 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [photo, setPhoto] = useState(null);
     const navigate = useNavigate();
-
+    axios.default.widthCredantials=true;
     const handleRegister = async (e) => {
         e.preventDefault();
     
@@ -36,7 +36,7 @@ const Register = () => {
         formData.append('photo', photo);
     
         try {
-            await axios.post('mern-stack-api-beta.vercel.app/register', formData, {
+            await axios.post('https://mern-stack-api-beta.vercel.app//register', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             alert('Registration Successful');
