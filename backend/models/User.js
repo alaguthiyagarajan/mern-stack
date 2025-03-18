@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -7,17 +8,26 @@ const userSchema = new mongoose.Schema({
     className: { type: String, required: true },
     fatherName: { type: String, required: true },
     password: { type: String, required: true },
-    photo: { type: String },
+    photo: { type: String, default: " " }, // Default placeholder image
     marks: {
-        tamil: { type: Number, default: 0 },
-        english: { type: Number, default: 0 },
-        maths: { type: Number, default: 0 },
-        science: { type: Number, default: 0 },
-        socialScience: { type: Number, default: 0 },
+        type: Map,
+        of: Number,
+        default: {}
     }
 }, { timestamps: true });
 
+// Index for faster search (ensure you need this unique constraint)
+userSchema.index({ name: 1, fatherName: 1 }, { unique: true });
+
+// Hash password before saving (prevent double hashing)
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+    
+    if (!this.password.startsWith("$2a$")) { // Ensures password isn't already hashed
+        this.password = await bcrypt.hash(this.password, 10);
+    }
+    next();
+});
+
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;
-

@@ -9,30 +9,31 @@ const User = require('./models/User');
 
 const app = express();
 app.use(express.json());
-app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ Set API Base URL dynamically from environment variables
+const API_BASE_URL = process.env.API_BASE_URL || "https://mern-stack-cmd5.onrender.com";
+
+// ✅ Configure CORS properly
 app.use(cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-    methods: "GET, POST, PUT, DELETE",
-    allowedHeaders: ["Content-Type", "Authorization"]
+    origin: ["https://mern-stack-1-xv17.onrender.com", API_BASE_URL],
+    credentials: true
 }));
 
-app.options('*', cors()); // Allow all preflight requests
+app.options('*', cors()); // Allow preflight requests
 
-
+app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
-// MongoDB Connection
+// ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => console.log("✅ Connected to MongoDB"))
-.catch(err => {
-    console.error("❌ MongoDB Connection Error:", err.message);
-});
+.catch(err => console.error("❌ MongoDB Error:", err.message));
 
-
+// ✅ Configure Multer for Image Uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
@@ -49,25 +50,24 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ 
     storage,
     fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB max file size
+    limits: { fileSize: 5 * 1024 * 1024 } 
 });
 
-// Register Route
-app.post('/register', upload.single('photo'), async (req, res) => {
+// ✅ Register Route
+app.post('/Register', upload.single('photo'), async (req, res) => {
     try {
-        console.log("📌 Register API Hit");
-
         const { name, age, std, className, fatherName, password, confirmPassword } = req.body;
-        console.log("📌 Received Data:", req.body);
+
+        if (!name || !age || !std || !className || !fatherName || !password || !confirmPassword) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
 
         if (password !== confirmPassword) {
-            console.log("❌ Passwords do not match");
             return res.status(400).json({ error: 'Passwords do not match' });
         }
 
         const existingUser = await User.findOne({ name, fatherName });
         if (existingUser) {
-            console.log("❌ User already exists");
             return res.status(400).json({ error: 'User already exists' });
         }
 
@@ -77,21 +77,18 @@ app.post('/register', upload.single('photo'), async (req, res) => {
         const newUser = new User({ name, age, std, className, fatherName, password: hashedPassword, photo: photoPath });
         await newUser.save();
 
-        console.log("✅ User Registered Successfully");
-        res.json({ message: 'User Registered Successfully' });
+        res.status(201).json({ message: 'User Registered Successfully' });
     } catch (error) {
-        console.error("❌ Error in /register:", error.message);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
-
-// GET "/" Route
+// ✅ GET "Home" Route
 app.get("/", (req, res) => {
-    res.json("hello");
+    res.json({ message: "Hello, server is running!" });
 });
 
-// Add Marks Route
+// ✅ Add Marks Route
 app.post("/add-marks", async (req, res) => {
     try {
         const { userId, marks } = req.body;
@@ -111,11 +108,11 @@ app.post("/add-marks", async (req, res) => {
     }
 });
 
-// Update Marks Route
+// ✅ Update Marks Route
 app.post("/update-marks", async (req, res) => {
     try {
         const { name, fatherName, marks } = req.body;
-        if (!name || !fatherName) return res.status(400).json({ error: "Name and Father's Name are required" });
+        if (!name || !fatherName || !marks) return res.status(400).json({ error: "Name, Father's Name, and Marks are required" });
 
         const user = await User.findOne({ name, fatherName });
         if (!user) return res.status(404).json({ error: "User not found" });
@@ -128,7 +125,7 @@ app.post("/update-marks", async (req, res) => {
     }
 });
 
-// Login Route
+// ✅ Login Route
 app.post("/login", async (req, res) => {
     try {
         const { name, password } = req.body;
@@ -154,7 +151,6 @@ app.post("/login", async (req, res) => {
     }
 });
 
-
-// Start Server
-const PORT = process.env.PORT || 5000;
+// ✅ Start Server
+const PORT = process.env.PORT || 1000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
