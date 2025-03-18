@@ -129,13 +129,21 @@ app.post("/update-marks", async (req, res) => {
 app.post("/login", async (req, res) => {
     try {
         const { name, password } = req.body;
-        if (!name || !password) return res.status(400).json({ error: "Name and Password are required" });
+        if (!name || !password) {
+            return res.status(400).json({ error: "Name and Password are required" });
+        }
 
         const user = await User.findOne({ name });
-        if (!user) return res.status(404).json({ error: "User not found" });
+        if (!user) {
+            console.log("❌ User not found:", name);
+            return res.status(404).json({ error: "User not found" });
+        }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.status(401).json({ error: "Invalid credentials" });
+        if (!isPasswordValid) {
+            console.log("❌ Invalid credentials for:", name);
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
 
         res.status(200).json({
             name: user.name,
@@ -147,9 +155,11 @@ app.post("/login", async (req, res) => {
             photo: user.photo
         });
     } catch (error) {
+        console.error("❌ Login error:", error);
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // ✅ Start Server
 const PORT = process.env.PORT || 1000;
