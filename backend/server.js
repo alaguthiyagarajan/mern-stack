@@ -6,6 +6,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const User = require('./models/User');
+import fs from "fs";
 
 const app = express();
 app.use(express.json());
@@ -84,41 +85,28 @@ app.post('/Register', upload.single('photo'), async (req, res) => {
 });
 
 // ✅ Login Route
+
+
 app.post("/login", async (req, res) => {
-   
     try {
         const { name, password } = req.body;
-        if (!name || !password) {
-            return res.status(400).json({ error: "Name and Password are required" });
-        }
-
         const user = await User.findOne({ name });
+
         if (!user) {
-            console.log("❌ User not found:", name);
-            return res.status(404).json({ error: "User not found" });
-        }
-         console.log("login server working");
-        console.log("Entered Password:", password);
-        console.log("Stored Hashed Password:", user.password);
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            console.log("❌ Invalid credentials for:", name);
-            return res.status(401).json({ error: "Invalid credentials" });
+            fs.appendFileSync("error.log", `Login failed: User not found\n`);
+            return res.status(401).json({ message: "User not found" });
         }
 
-        res.status(200).json({
-            name: user.name,
-            age: user.age,
-            className: user.className,
-            fatherName: user.fatherName,
-            std: user.std,
-            marks: user.marks || {}, 
-            photo: user.photo
-        });
-    } catch (error) {
-        console.error("❌ Login error:", error);
-        res.status(500).json({ error: error.message });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            fs.appendFileSync("error.log", `Login failed: Password mismatch\n`);
+            return res.status(401).json({ message: "Invalid password" });
+        }
+
+        res.json({ message: "Login successful" });
+    } catch (err) {
+        fs.appendFileSync("error.log", `Server error: ${err.message}\n`);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 
