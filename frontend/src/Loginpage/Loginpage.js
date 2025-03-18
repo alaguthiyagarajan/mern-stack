@@ -20,7 +20,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/login", { name, password });
+            const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password });
             if (!response.data || !response.data.name) {
                 alert("Login successful, but user data is missing!");
                 return;
@@ -54,7 +54,7 @@ const Login = () => {
             return;
         }
         try {
-            await axios.post("http://localhost:5000/update-marks", { 
+            await axios.post("https://mern-stack-cmd5.onrender.com/update-marks", { 
                 name: userData.name, 
                 fatherName: userData.fatherName, 
                 marks 
@@ -82,7 +82,7 @@ const Login = () => {
 
     <div className="profile">
         <img 
-            src={`http://localhost:5000/${userData.photo}`} 
+            src={`https://mern-stack-cmd5.onrender.com/${userData.photo}`} 
             className="profile-img" 
             alt="User Photo" 
         />
