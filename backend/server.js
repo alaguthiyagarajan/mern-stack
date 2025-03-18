@@ -127,6 +127,7 @@ app.post("/update-marks", async (req, res) => {
 
 // ✅ Login Route
 app.post("/login", async (req, res) => {
+    console.log("login server working");
     try {
         const { name, password } = req.body;
         if (!name || !password) {
