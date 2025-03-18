@@ -127,7 +127,7 @@ app.post("/update-marks", async (req, res) => {
 
 // ✅ Login Route
 app.post("/login", async (req, res) => {
-    console.log("login server working");
+   
     try {
         const { name, password } = req.body;
         if (!name || !password) {
@@ -139,7 +139,7 @@ app.post("/login", async (req, res) => {
             console.log("❌ User not found:", name);
             return res.status(404).json({ error: "User not found" });
         }
-
+         console.log("login server working");
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             console.log("❌ Invalid credentials for:", name);
