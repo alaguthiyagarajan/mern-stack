@@ -16,7 +16,7 @@ const Login = () => {
     });
     const [percentage, setPercentage] = useState(0);
     const navigate = useNavigate();
-    axios.default.widthCredantials=true;
+    axios.defaults.withCredentials = true;
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
