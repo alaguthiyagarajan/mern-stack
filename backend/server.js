@@ -111,7 +111,7 @@ app.post("/login", async (req, res) => {
 });
 
 // ✅ GET "Home" Route
-app.get("/", (req, res) => {
+app.post("/", (req, res) => {
     res.json({ message: "Hello, server is running!" });
 });
 
