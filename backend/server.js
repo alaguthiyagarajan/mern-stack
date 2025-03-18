@@ -1,4 +1,4 @@
-require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -7,6 +7,9 @@ const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const User = require('./models/User');
 import fs from "fs";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 const app = express();
 app.use(express.json());
