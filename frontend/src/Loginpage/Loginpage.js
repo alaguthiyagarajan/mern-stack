@@ -20,7 +20,7 @@ const Login = () => {
    const handleLogin = async (e) => {
     e.preventDefault();
     try {
-        const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password });
+        const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password },{ withCredentials: true });
 
         if (!response.data || !response.data.name) {
             alert("Login successful, but user data is missing!");
