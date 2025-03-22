@@ -20,7 +20,8 @@ const API_BASE_URL = process.env.API_BASE_URL || "https://mern-stack-cmd5.onrend
 // ✅ Configure CORS properly
 app.use(cors({
     origin: ["https://mern-stack-1-xv17.onrender.com", API_BASE_URL],
-    credentials: true
+    credentials: true,
+    methods: ["GET", "POST"]
 }));
 
 app.options('*', cors()); // Allow preflight requests
@@ -91,26 +92,34 @@ app.post('/Register', upload.single('photo'), async (req, res) => {
 
 app.post("/login", async (req, res) => {
     try {
+        console.log("Login request received:", req.body);
         const { name, password } = req.body;
+
+        if (!name || !password) {
+            return res.status(400).json({ message: "Name and password are required" });
+        }
+
         const user = await User.findOne({ name });
 
         if (!user) {
-            fs.appendFileSync("error.log", `Login failed: User not found\n`);
+            console.log("Login failed: User not found");
             return res.status(401).json({ message: "User not found" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            fs.appendFileSync("error.log", `Login failed: Password mismatch\n`);
+            console.log("Login failed: Invalid password");
             return res.status(401).json({ message: "Invalid password" });
         }
 
+        console.log("Login successful:", user.name);
         res.json({ message: "Login successful" });
     } catch (err) {
-        fs.appendFileSync("error.log", `Server error: ${err.message}\n`);
+        console.error("Server error:", err.message);
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
 
 // ✅ GET "Home" Route
 app.post("/", (req, res) => {
