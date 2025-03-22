@@ -17,23 +17,28 @@ const Login = () => {
     const [percentage, setPercentage] = useState(0);
     const navigate = useNavigate();
     axios.defaults.withCredentials = true;
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password });
-            if (!response.data || !response.data.name) {
-                alert("Login successful, but user data is missing!");
-                return;
-            }
-            setUserData(response.data);
-            if (response.data.marks) {
-                setMarks(response.data.marks);
-                calculatePercentage(response.data.marks);
-            }
-        } catch (error) {
-            alert("Login failed: " + (error.response?.data?.error || "Unknown error"));
+   const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password });
+
+        if (!response.data || !response.data.name) {
+            alert("Login successful, but user data is missing!");
+            console.error("Unexpected response:", response.data);
+            return;
         }
-    };
+
+        setUserData(response.data);
+
+        if (response.data.marks) {
+            setMarks(response.data.marks);
+            calculatePercentage(response.data.marks);
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        alert("Login failed: " + (error.response?.data?.error || "Unknown error"));
+    }
+};
 
     const calculatePercentage = (marks) => {
         const totalMarks = Object.values(marks).reduce((acc, val) => acc + Number(val), 0);
