@@ -5,17 +5,14 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const morgan = require('morgan');
 const User = require('./models/User');
 const fs = require('fs');
+
+
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
-app.use(morgan('combined'));
 
 // ✅ Set API Base URL dynamically from environment variables
 const API_BASE_URL = process.env.API_BASE_URL || "https://mern-stack-cmd5.onrender.com";
@@ -32,24 +29,13 @@ app.options('*', cors()); // Allow preflight requests
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
-// ✅ Rate Limiting
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: "Too many requests from this IP, please try again later."
-});
-app.use(apiLimiter);
-
 // ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => console.log("✅ Connected to MongoDB"))
-.catch(err => {
-    console.error("❌ MongoDB Error:", err.message);
-    process.exit(1); // Exit the process with failure
-});
+.catch(err => console.error("❌ MongoDB Error:", err.message));
 
 // ✅ Configure Multer for Image Uploads
 const storage = multer.diskStorage({
@@ -102,6 +88,8 @@ app.post('/Register', upload.single('photo'), async (req, res) => {
 });
 
 // ✅ Login Route
+
+
 app.post("/login", async (req, res) => {
     try {
         console.log("Login request received:", req.body);
@@ -148,6 +136,8 @@ app.post("/login", async (req, res) => {
     }
 });
 
+
+
 // ✅ GET "Home" Route
 app.post("/", (req, res) => {
     res.json({ message: "Hello, server is running!" });
@@ -189,6 +179,9 @@ app.post("/update-marks", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
+
 
 // ✅ Start Server
 const PORT = process.env.PORT || 1000;
