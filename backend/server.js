@@ -113,12 +113,29 @@ app.post("/login", async (req, res) => {
         }
 
         console.log("Login successful:", user.name);
-        res.json({ message: "Login successful" });
+
+        // ✅ Return full user data
+        res.json({
+            name: user.name,
+            age: user.age,
+            std: user.std,
+            className: user.className,
+            fatherName: user.fatherName,
+            photo: user.photo,
+            marks: user.marks || {
+                tamil: "",
+                english: "",
+                maths: "",
+                science: "",
+                socialScience: ""
+            }
+        });
     } catch (err) {
         console.error("Server error:", err.message);
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
 
 
 // ✅ GET "Home" Route
