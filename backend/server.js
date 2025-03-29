@@ -19,10 +19,11 @@ const API_BASE_URL = process.env.API_BASE_URL || "https://mern-stack-cmd5.onrend
 
 // ✅ Configure CORS properly
 app.use(cors({
-    origin: ["https://mern-stack-1-xv17.onrender.com", API_BASE_URL],
+    origin: "*", // Allow all origins for testing
     credentials: true,
     methods: ["GET", "POST"]
 }));
+
 
 app.options('*', cors()); // Allow preflight requests
 
@@ -92,49 +93,37 @@ app.post('/Register', upload.single('photo'), async (req, res) => {
 
 app.post("/login", async (req, res) => {
     try {
-        console.log("Login request received:", req.body);
-        const { name, password } = req.body;
+        console.log("Login request received:", req.body); // ✅ Log incoming request
 
+        const { name, password } = req.body;
         if (!name || !password) {
+            console.log("Missing credentials");
             return res.status(400).json({ message: "Name and password are required" });
         }
 
         const user = await User.findOne({ name });
-
         if (!user) {
-            console.log("Login failed: User not found");
+            console.log("User not found:", name);
             return res.status(401).json({ message: "User not found" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log("Password match:", isMatch); // ✅ See if passwords match
+
         if (!isMatch) {
-            console.log("Login failed: Invalid password");
+            console.log("Invalid password for:", name);
             return res.status(401).json({ message: "Invalid password" });
         }
 
-        console.log("Login successful:", user.name);
+        console.log("Login successful for:", user.name);
+        res.json({ message: "Login successful" });
 
-        // ✅ Return full user data
-        res.json({
-            name: user.name,
-            age: user.age,
-            std: user.std,
-            className: user.className,
-            fatherName: user.fatherName,
-            photo: user.photo,
-            marks: user.marks || {
-                tamil: "",
-                english: "",
-                maths: "",
-                science: "",
-                socialScience: ""
-            }
-        });
     } catch (err) {
         console.error("Server error:", err.message);
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
 
 
 
