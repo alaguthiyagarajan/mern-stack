@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Loginpage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -16,29 +16,49 @@ const Login = () => {
     });
     const [percentage, setPercentage] = useState(0);
     const navigate = useNavigate();
+    
     axios.defaults.withCredentials = true;
-   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-        const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password },{ withCredentials: true });
 
-        if (!response.data || !response.data.name) {
-            alert("Login successful, but user data is missing!");
-            console.error("Unexpected response:", response.data);
-            return;
+    useEffect(() => {
+        // Check if user is already logged in
+        const storedUser = localStorage.getItem("userData");
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            setUserData(parsedUser);
+            if (parsedUser.marks) {
+                setMarks(parsedUser.marks);
+                calculatePercentage(parsedUser.marks);
+            }
         }
+    }, []);
 
-        setUserData(response.data);
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post(
+                "https://mern-stack-cmd5.onrender.com/login",
+                { name, password },
+                { withCredentials: true }
+            );
 
-        if (response.data.marks) {
-            setMarks(response.data.marks);
-            calculatePercentage(response.data.marks);
+            if (!response.data || !response.data.name) {
+                alert("Login successful, but user data is missing!");
+                console.error("Unexpected response:", response.data);
+                return;
+            }
+
+            setUserData(response.data);
+            localStorage.setItem("userData", JSON.stringify(response.data)); // Store session
+
+            if (response.data.marks) {
+                setMarks(response.data.marks);
+                calculatePercentage(response.data.marks);
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            alert("Login failed: " + (error.response?.data?.error || "Unknown error"));
         }
-    } catch (error) {
-        console.error("Login error:", error);
-        alert("Login failed: " + (error.response?.data?.error || "Unknown error"));
-    }
-};
+    };
 
     const calculatePercentage = (marks) => {
         const totalMarks = Object.values(marks).reduce((acc, val) => acc + Number(val), 0);
@@ -70,68 +90,99 @@ const Login = () => {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("userData"); // Clear session
+        setUserData(null);
+        setName("");
+        setPassword("");
+        setMarks({
+            tamil: "",
+            english: "",
+            maths: "",
+            science: "",
+            socialScience: "",
+        });
+        setPercentage(0);
+        navigate("/"); // Redirect to login page
+    };
+
     return (
         <div className="body">
             <div className="login-container">
                 <h2 className="h2">Login</h2>
                 {!userData ? (
                     <form onSubmit={handleLogin}>
-                        <input type="text" className="input" placeholder="User ID" value={name} onChange={(e) => setName(e.target.value)} required />
-                        <input type="password" className="input" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <input 
+                            type="text" 
+                            className="input" 
+                            placeholder="User ID" 
+                            value={name} 
+                            onChange={(e) => setName(e.target.value)} 
+                            required 
+                        />
+                        <input 
+                            type="password" 
+                            className="input" 
+                            placeholder="Password" 
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            required 
+                        />
                         <button type="submit" className="button1">Login</button>
                         <button type="button" className="button2" onClick={() => navigate('/Register')}>Register</button>
                     </form>
                 ) : (
                     <div className="profile-container">
-    <h3 className="title">Welcome, {userData.name}!</h3>
+                        <h3 className="title">Welcome, {userData.name}!</h3>
 
-    <div className="profile">
-        <img 
-            src={`https://mern-stack-cmd5.onrender.com/${userData.photo}`} 
-            className="profile-img" 
-            alt="User Photo" 
-        />
-    </div>
-
-    <div className="details">
-        <p><span className="label">Age:</span> {userData.age}</p>
-        <p><span className="label">Class:</span> {userData.className}</p>
-        <p><span className="label">Father's Name:</span> {userData.fatherName}</p>
-        <p><span className="label">Standard:</span> {userData.std}</p>
-    </div>
-
-    <h3 className="subtitle">Marks</h3>
-    <form onSubmit={handleUpdateMarks} className="marks-form">
-        <table className="marks-table">
-            <thead>
-                <tr>
-                    <th>Subject</th>
-                    <th>Marks</th>
-                </tr>
-            </thead>
-            <tbody>
-                {Object.keys(marks).map((subject) => (
-                    <tr key={subject}>
-                        <td>{subject.replace(/([A-Z])/g, " $1")}</td>
-                        <td>
-                            <input 
-                                type="number" 
-                                className="marks-input" 
-                                name={subject} 
-                                value={marks[subject]} 
-                                onChange={handleChange} 
-                                required 
+                        <div className="profile">
+                            <img 
+                                src={`https://mern-stack-cmd5.onrender.com/${userData.photo}`} 
+                                className="profile-img" 
+                                alt="User Photo" 
                             />
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-        <h3 className="percentage">Total Percentage: {percentage}%</h3>
-        <button type="submit" className="update-btn">Update Marks</button>
-    </form>
-</div>
+                        </div>
 
+                        <div className="details">
+                            <p><span className="label">Age:</span> {userData.age}</p>
+                            <p><span className="label">Class:</span> {userData.className}</p>
+                            <p><span className="label">Father's Name:</span> {userData.fatherName}</p>
+                            <p><span className="label">Standard:</span> {userData.std}</p>
+                        </div>
+
+                        <h3 className="subtitle">Marks</h3>
+                        <form onSubmit={handleUpdateMarks} className="marks-form">
+                            <table className="marks-table">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Marks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Object.keys(marks).map((subject) => (
+                                        <tr key={subject}>
+                                            <td>{subject.replace(/([A-Z])/g, " $1")}</td>
+                                            <td>
+                                                <input 
+                                                    type="number" 
+                                                    className="marks-input" 
+                                                    name={subject} 
+                                                    value={marks[subject]} 
+                                                    onChange={handleChange} 
+                                                    required 
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            <h3 className="percentage">Total Percentage: {percentage}%</h3>
+                            <button type="submit" className="update-btn">Update Marks</button>
+                        </form>
+
+                        <button onClick={handleLogout} className="logout-btn">Logout</button>
+                    </div>
                 )}
             </div>
         </div>
