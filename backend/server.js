@@ -7,30 +7,19 @@ const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const User = require('./models/User');
 const fs = require('fs');
-res.setHeader("Access-Control-Allow-Origin", "https://mern-stack-1-xv17.onrender.com");
-res.setHeader("Access-Control-Allow-Credentials", "true");
-
-
-
-app.use(cors({
-    origin: "https://mern-stack-1-xv17.onrender.com", // Allow only your frontend
-    credentials: true, // Allow credentials (cookies, authorization headers)
-}));
 
 const app = express();
+
+// ✅ CORS Middleware - Fixing CORS issue
+app.use(cors({
+    origin: "https://mern-stack-1-xv17.onrender.com", // Allow only your frontend
+    credentials: true, // Allow cookies and authentication headers
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allow these methods
+    allowedHeaders: ["Content-Type", "Authorization"] // Allow headers
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// ✅ Set API Base URL dynamically from environment variables
-const API_BASE_URL = process.env.API_BASE_URL || "https://mern-stack-cmd5.onrender.com";
-
-
-
-
-
-
-app.options('*', cors()); // Allow preflight requests
-
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
@@ -42,7 +31,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("✅ Connected to MongoDB"))
 .catch(err => console.error("❌ MongoDB Error:", err.message));
 
-// ✅ Configure Multer for Image Uploads
+// ✅ Multer Storage Configuration for Image Uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
@@ -92,12 +81,10 @@ app.post('/Register', upload.single('photo'), async (req, res) => {
     }
 });
 
-// ✅ Login Route
-
-
+// ✅ Login Route (Fixed)
 app.post("/login", async (req, res) => {
     try {
-        console.log("Login request received:", req.body); // ✅ Log incoming request
+        console.log("Login request received:", req.body);
 
         const { name, password } = req.body;
         if (!name || !password) {
@@ -112,7 +99,7 @@ app.post("/login", async (req, res) => {
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log("Password match:", isMatch); // ✅ See if passwords match
+        console.log("Password match:", isMatch);
 
         if (!isMatch) {
             console.log("Invalid password for:", name);
@@ -120,20 +107,20 @@ app.post("/login", async (req, res) => {
         }
 
         console.log("Login successful for:", user.name);
-        res.json({ message: "Login successful" });
+        res.json({
+            name: user.name,
+            age: user.age,
+            std: user.std,
+            className: user.className,
+            fatherName: user.fatherName,
+            photo: user.photo,
+            marks: user.marks || {}
+        });
 
     } catch (err) {
         console.error("Server error:", err.message);
         res.status(500).json({ message: "Internal server error" });
     }
-});
-
-
-
-
-// ✅ GET "Home" Route
-app.post("/", (req, res) => {
-    res.json({ message: "Hello, server is running!" });
 });
 
 // ✅ Add Marks Route
@@ -173,8 +160,10 @@ app.post("/update-marks", async (req, res) => {
     }
 });
 
-
-
+// ✅ Home Route
+app.get("/", (req, res) => {
+    res.json({ message: "Hello, server is running!" });
+});
 
 // ✅ Start Server
 const PORT = process.env.PORT || 1000;
