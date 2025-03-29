@@ -34,17 +34,29 @@ const Login = () => {
 
 const handleLogin = async (e) => {
     e.preventDefault();
+    
+    console.log("Attempting login with:", { name: enteredName, password: enteredPassword });
+
+    if (!enteredName || !enteredPassword) {
+        console.error("Missing login details");
+        return;
+    }
+
     try {
-        const response = await axios.post(
-            "https://mern-stack-cmd5.onrender.com/login",
-            { name, password },
-            {
-                withCredentials: true,
-                headers: {
-                    "Authorization": `Bearer ${yourAuthToken}` // Add your auth token here
-                }
-            }
+        const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", 
+            { name: enteredName, password: enteredPassword }, 
+            { withCredentials: true }  // ✅ Ensure credentials are sent if using cookies
         );
+
+        console.log("Login Success:", response.data);
+        // Handle successful login
+    } catch (error) {
+        console.error("Login error:", error.response ? error.response.data : error.message);
+    }
+};
+
+
+          
 
         if (!response.data || !response.data.name) {
             alert("Login successful, but user data is missing!");
