@@ -34,30 +34,24 @@ const Login = () => {
 
 const handleLogin = async (e) => {
     e.preventDefault();
-    
-    console.log("Attempting login with:", { name: enteredName, password: enteredPassword });
 
-    if (!enteredName || !enteredPassword) {
+    console.log("Attempting login with:", { name, password });
+
+    if (!name || !password) {
         console.error("Missing login details");
+        alert("Please enter both User ID and Password");
         return;
     }
 
     try {
         const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", 
-            { name: enteredName, password: enteredPassword }, 
+            { name, password }, 
             { withCredentials: true }  // ✅ Ensure credentials are sent if using cookies
         );
 
         console.log("Login Success:", response.data);
-        // Handle successful login
-    } catch (error) {
-        console.error("Login error:", error.response ? error.response.data : error.message);
-    }
-};
 
-
-          
-
+        // Check if the API response contains the expected user data
         if (!response.data || !response.data.name) {
             alert("Login successful, but user data is missing!");
             console.error("Unexpected response:", response.data);
@@ -71,11 +65,14 @@ const handleLogin = async (e) => {
             setMarks(response.data.marks);
             calculatePercentage(response.data.marks);
         }
+
+        alert("Login successful!"); // Show success message
     } catch (error) {
         console.error("Login error:", error);
         alert("Login failed: " + (error.response?.data?.error || "Unknown error"));
     }
 };
+
 
     const calculatePercentage = (marks) => {
         const totalMarks = Object.values(marks).reduce((acc, val) => acc + Number(val), 0);
