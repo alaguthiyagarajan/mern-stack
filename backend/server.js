@@ -7,8 +7,15 @@ const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const User = require('./models/User');
 const fs = require('fs');
+res.setHeader("Access-Control-Allow-Origin", "https://mern-stack-1-xv17.onrender.com");
+res.setHeader("Access-Control-Allow-Credentials", "true");
 
 
+
+app.use(cors({
+    origin: "https://mern-stack-1-xv17.onrender.com", // Allow only your frontend
+    credentials: true, // Allow credentials (cookies, authorization headers)
+}));
 
 const app = express();
 app.use(express.json());
@@ -17,12 +24,9 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ Set API Base URL dynamically from environment variables
 const API_BASE_URL = process.env.API_BASE_URL || "https://mern-stack-cmd5.onrender.com";
 
-// ✅ Configure CORS properly
-app.use(cors({
-    origin: "*", // Allow all origins for testing
-    credentials: true,
-    methods: ["GET", "POST"]
-}));
+
+
+
 
 
 app.options('*', cors()); // Allow preflight requests
