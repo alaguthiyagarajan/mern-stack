@@ -164,36 +164,38 @@ const handleLogin = async (e) => {
                             <p><span className="label">Standard:</span> {userData.std}</p>
                         </div>
 
-                        <h3 className="subtitle">Marks</h3>
-                        <form onSubmit={handleUpdateMarks} className="marks-form">
-                            <table className="marks-table">
-                                <thead>
-                                    <tr>
-                                        <th>Subject</th>
-                                        <th>Marks</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {Object.keys(marks).map((subject) => (
-                                        <tr key={subject}>
-                                            <td>{subject.replace(/([A-Z])/g, " $1")}</td>
-                                            <td>
-                                                <input 
-                                                    type="number" 
-                                                    className="marks-input" 
-                                                    name={subject} 
-                                                    value={marks[subject]} 
-                                                    onChange={handleChange} 
-                                                    required 
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            <h3 className="percentage">Total Percentage: {percentage}%</h3>
-                            <button type="submit" className="update-btn">Update Marks</button>
-                        </form>
+                     <h3 className="subtitle">Marks</h3>
+<form onSubmit={handleUpdateMarks} className="marks-form">
+    <table className="marks-table">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Marks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {Object.keys(marks).map((subject) => (
+                <tr key={subject}>
+                    <td>{subject.charAt(0).toUpperCase() + subject.slice(1)}</td>
+                    <td>
+                        <input 
+                            type="number" 
+                            className="marks-input" 
+                            name={subject} 
+                            value={marks[subject]} 
+                            onChange={handleChange} 
+                            placeholder="Enter marks"
+                            required 
+                        />
+                    </td>
+                </tr>
+            ))}
+        </tbody>
+    </table>
+    <h3 className="percentage">Total Percentage: {percentage}%</h3>
+    <button type="submit" className="update-btn">Update Marks</button>
+</form>
+
 
                         <button onClick={handleLogout} className="logout-btn">Logout</button>
                     </div>
