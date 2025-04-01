@@ -20,53 +20,55 @@ const Login = () => {
     axios.defaults.withCredentials = true;
 
     useEffect(() => {
-    const storedUser = localStorage.getItem("userData");
-    if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUserData(parsedUser);
-        if (Array.isArray(parsedUser.marks)) {
-            setMarks(parsedUser.marks);
-            calculatePercentage(parsedUser.marks);
-        } else {
-            setMarks([]); // Set to empty array if it's not an array
+        // Check if user is already logged in
+        const storedUser = localStorage.getItem("userData");
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            setUserData(parsedUser);
+            if (Array.isArray(parsedUser.marks)) {
+                setMarks(parsedUser.marks);
+                calculatePercentage(parsedUser.marks);
+            } else {
+                setMarks([
+                    { subject: "Tamil", score: "" },
+                    { subject: "English", score: "" },
+                    { subject: "Maths", score: "" },
+                    { subject: "Science", score: "" },
+                    { subject: "Social", score: "" }
+                ]); // Reset marks if not valid
+            }
         }
-    }
-}, []);
+    }, []);
 
+    const handleLogin = async (e) => {
+        e.preventDefault();
 
-   const handleLogin = async (e) => {
-    e.preventDefault();
-
-    if (!name || !password) {
-        alert("Please enter both User ID and Password");
-        return;
-    }
-
-    try {
-        const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password }, { withCredentials: true });
-
-        if (!response.data || !response.data.name) {
-            alert("Login successful, but user data is missing!");
+        if (!name || !password) {
+            alert("Please enter both User ID and Password");
             return;
         }
 
-        setUserData(response.data);
-        localStorage.setItem("userData", JSON.stringify(response.data)); // Store session
+        try {
+            const response = await axios.post("https://mern-stack-cmd5.onrender.com/login", { name, password }, { withCredentials: true });
 
-        // Ensure marks is always an array
-        if (Array.isArray(response.data.marks)) {
-            setMarks(response.data.marks);
-            calculatePercentage(response.data.marks);
-        } else {
-            setMarks([]); // Default to empty array
+            if (!response.data || !response.data.name) {
+                alert("Login successful, but user data is missing!");
+                return;
+            }
+
+            setUserData(response.data);
+            localStorage.setItem("userData", JSON.stringify(response.data));
+
+            if (Array.isArray(response.data.marks)) {
+                setMarks(response.data.marks);
+                calculatePercentage(response.data.marks);
+            }
+
+            alert("Login successful!");
+        } catch (error) {
+            alert("Login failed: " + (error.response?.data?.error || "Unknown error"));
         }
-
-        alert("Login successful!");
-    } catch (error) {
-        alert("Login failed: " + (error.response?.data?.error || "Unknown error"));
-    }
-};
-
+    };
 
     const calculatePercentage = (marksData) => {
         if (!Array.isArray(marksData)) {
@@ -86,32 +88,29 @@ const Login = () => {
         calculatePercentage(updatedMarks);
     };
 
-  const handleUpdateMarks = async (e) => {
-    e.preventDefault();
+    const handleUpdateMarks = async (e) => {
+        e.preventDefault();
+        if (!userData || !userData.name || !userData.fatherName) {
+            alert("User details are missing. Please log in again.");
+            return;
+        }
 
-    if (!userData || !userData.name || !userData.fatherName) {
-        alert("User details are missing. Please log in again.");
-        return;
-    }
+        const marksToSend = marks.map(mark => ({
+            subject: mark.subject,
+            score: Number(mark.score) || 0
+        }));
 
-    // Ensure marks are correctly formatted as an array of numbers
-    const marksToSend = marks.map(mark => ({
-        subject: mark.subject,
-        score: Number(mark.score) || 0 // Ensure valid number for score
-    }));
-
-    try {
-        await axios.post("https://mern-stack-cmd5.onrender.com/update-marks", {
-            name: userData.name,
-            fatherName: userData.fatherName,
-            marks: marksToSend,
-        });
-        alert("Marks updated successfully!");
-    } catch (error) {
-        alert("Error updating marks: " + (error.response?.data?.error || error.message));
-    }
-};
-
+        try {
+            await axios.post("https://mern-stack-cmd5.onrender.com/update-marks", {
+                name: userData.name,
+                fatherName: userData.fatherName,
+                marks: marksToSend,
+            });
+            alert("Marks updated successfully!");
+        } catch (error) {
+            alert("Error updating marks: " + (error.response?.data?.error || error.message));
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("userData");
@@ -192,7 +191,7 @@ const Login = () => {
                                                     className="marks-input" 
                                                     value={mark.score} 
                                                     onChange={(e) => handleChange(index, e.target.value)} 
-                                                    placeholder="Enter marks"
+                                                    placeholder="Enter marks" 
                                                     required 
                                                 />
                                             </td>
