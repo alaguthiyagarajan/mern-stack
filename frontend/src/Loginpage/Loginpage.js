@@ -94,10 +94,10 @@ const Login = () => {
             return;
         }
 
-        const marksToSend = marks.map(mark => ({
-            subject: mark.subject,
-            score: Number(mark.score) || 0
-        }));
+       const marksToSend = Object.fromEntries(
+    Object.entries(marks).map(([key, value]) => [key, Number(value)])
+);
+
 
         try {
             await axios.post("https://mern-stack-cmd5.onrender.com/update-marks", {
