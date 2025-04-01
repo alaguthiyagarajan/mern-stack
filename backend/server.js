@@ -139,18 +139,31 @@ app.post("/add-marks", async (req, res) => {
 app.post("/update-marks", async (req, res) => {
     try {
         const { name, fatherName, marks } = req.body;
-        if (!name || !fatherName || !marks) return res.status(400).json({ error: "Name, Father's Name, and Marks are required" });
 
+        if (!name || !fatherName || !marks) {
+            return res.status(400).json({ error: "Name, Father's Name, and Marks are required" });
+        }
+
+        // Find the user by name and fatherName
         const user = await User.findOne({ name, fatherName });
-        if (!user) return res.status(404).json({ error: "User not found" });
 
-        user.marks = marks;
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Update the marks
+        user.marks = marks;  // Directly update with the new marks
+
+        // Save the updated user
         await user.save();
-        res.json({ message: "Marks updated successfully", marks: user.marks });
+
+        return res.status(200).json({ message: "Marks updated successfully", marks: user.marks });
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error updating marks:", error);  // Log error
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 
 // ✅ Home Route
 app.get("/", (req, res) => {
