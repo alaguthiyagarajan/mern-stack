@@ -20,7 +20,6 @@ const Login = () => {
     axios.defaults.withCredentials = true;
 
     useEffect(() => {
-        // Check if user is already logged in
         const storedUser = localStorage.getItem("userData");
         if (storedUser) {
             const parsedUser = JSON.parse(storedUser);
@@ -35,7 +34,7 @@ const Login = () => {
                     { subject: "Maths", score: "" },
                     { subject: "Science", score: "" },
                     { subject: "Social", score: "" }
-                ]); // Reset marks if not valid
+                ]);
             }
         }
     }, []);
