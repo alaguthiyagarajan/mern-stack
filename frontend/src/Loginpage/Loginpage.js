@@ -76,19 +76,25 @@ const handleLogin = async (e) => {
 };
 
 
-  const calculatePercentage = (marks) => {
-    const totalMarks = marks.reduce((acc, mark) => acc + (Number(mark.score) || 0), 0);
-    const percentageValue = (totalMarks / (marks.length * 100)) * 100;
+  const calculatePercentage = (marksData) => {
+    if (!Array.isArray(marksData)) {
+        console.error("Marks data is not an array:", marksData);
+        return;
+    }
+
+    const totalMarks = marksData.reduce((acc, mark) => acc + (Number(mark.score) || 0), 0);
+    const percentageValue = (totalMarks / (marksData.length * 100)) * 100;
     setPercentage(percentageValue.toFixed(2));
 };
 
 
 
+
  const handleChange = (index, value) => {
-    const updatedMarks = [...marks];
-    updatedMarks[index].score = value;
+    const updatedMarks = [...marks]; // Clone the array
+    updatedMarks[index].score = value; // Update the value
     setMarks(updatedMarks);
-    calculatePercentage(updatedMarks);
+    calculatePercentage(updatedMarks); // Ensure array format
 };
 
 
