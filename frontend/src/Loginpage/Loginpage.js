@@ -7,13 +7,14 @@ const Login = () => {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [userData, setUserData] = useState(null);
-    const [marks, setMarks] = useState({
-        tamil: "",
-        english: "",
-        maths: "",
-        science: "",
-        socialScience: "",
-    });
+  const [marks, setMarks] = useState({
+    tamil: "",
+    english: "",
+    maths: "",
+    science: "",
+    social: "", 
+});
+
     const [percentage, setPercentage] = useState(0);
     const navigate = useNavigate();
     
@@ -74,35 +75,55 @@ const handleLogin = async (e) => {
 };
 
 
-    const calculatePercentage = (marks) => {
-        const totalMarks = Object.values(marks).reduce((acc, val) => acc + Number(val), 0);
-        const percentageValue = (totalMarks / (5 * 100)) * 100;
-        setPercentage(percentageValue.toFixed(2));
-    };
+   const calculatePercentage = (marks) => {
+    const totalMarks = Object.values(marks)
+        .map(Number)  // Convert all to numbers
+        .filter(val => !isNaN(val));  // Remove NaN values
 
-    const handleChange = (e) => {
-        const updatedMarks = { ...marks, [e.target.name]: e.target.value };
-        setMarks(updatedMarks);
-        calculatePercentage(updatedMarks);
-    };
+    if (totalMarks.length === 0) {
+        setPercentage(0);
+        return;
+    }
 
-    const handleUpdateMarks = async (e) => {
-        e.preventDefault();
-        if (!userData || !userData.name || !userData.fatherName) {
-            alert("User details are missing. Please log in again.");
-            return;
-        }
-        try {
-            await axios.post("https://mern-stack-cmd5.onrender.com/update-marks", { 
-                name: userData.name, 
-                fatherName: userData.fatherName, 
-                marks 
-            });
-            alert("Marks updated successfully!");
-        } catch (error) {
-            alert("Error updating marks: " + (error.response?.data?.error || error.message));
-        }
+    const total = totalMarks.reduce((acc, val) => acc + val, 0);
+    const percentageValue = (total / (totalMarks.length * 100)) * 100;
+    setPercentage(percentageValue.toFixed(2));
+};
+
+
+  const handleChange = (e) => {
+    const updatedMarks = { 
+        ...marks, 
+        [e.target.name]: Number(e.target.value)  // Convert to number
     };
+    setMarks(updatedMarks);
+    calculatePercentage(updatedMarks);
+};
+
+
+   const handleUpdateMarks = async (e) => {
+    e.preventDefault();
+    if (!userData || !userData.name || !userData.fatherName) {
+        alert("User details are missing. Please log in again.");
+        return;
+    }
+
+    const marksToSend = Object.fromEntries(
+        Object.entries(marks).map(([key, value]) => [key, Number(value)])
+    );
+
+    try {
+        await axios.post("https://mern-stack-cmd5.onrender.com/update-marks", { 
+            name: userData.name, 
+            fatherName: userData.fatherName, 
+            marks: marksToSend  // Send cleaned marks
+        });
+        alert("Marks updated successfully!");
+    } catch (error) {
+        alert("Error updating marks: " + (error.response?.data?.error || error.message));
+    }
+};
+
 
     const handleLogout = () => {
         localStorage.removeItem("userData"); // Clear session
