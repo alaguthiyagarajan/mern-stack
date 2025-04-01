@@ -144,7 +144,7 @@ const handleLogin = async (e) => {
     return (
         <div className="body">
             <div className="login-container">
-                <h2 className="h2">Login</h2>
+                <h2 className="h2">Logini</h2>
                 {!userData ? (
                     <form onSubmit={handleLogin}>
                         <input 
