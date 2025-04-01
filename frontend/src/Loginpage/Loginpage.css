@@ -156,3 +156,22 @@
 .update-btn:hover {
     background: #0056b3;
 }
+
+.marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.marks-table th, .marks-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.marks-input {
+    width: 100px;
+    padding: 5px;
+    text-align: center;
+    font-size: 16px;
+}
