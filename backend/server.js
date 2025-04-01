@@ -81,29 +81,21 @@ app.post('/Register', upload.single('photo'), async (req, res) => {
     }
 });
 
-// ✅ Login Route (Fixed)
+// ✅ Login Route (Without Password Decryption)
 app.post("/login", async (req, res) => {
     try {
         console.log("Login request received:", req.body);
 
-        const { name, password } = req.body;
-        if (!name || !password) {
+        const { name } = req.body;
+        if (!name) {
             console.log("Missing credentials");
-            return res.status(400).json({ message: "Name and password are required" });
+            return res.status(400).json({ message: "Name is required" });
         }
 
         const user = await User.findOne({ name });
         if (!user) {
             console.log("User not found:", name);
             return res.status(401).json({ message: "User not found" });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        console.log("Password match:", isMatch);
-
-        if (!isMatch) {
-            console.log("Invalid password for:", name);
-            return res.status(401).json({ message: "Invalid password" });
         }
 
         console.log("Login successful for:", user.name);
