@@ -7,13 +7,14 @@ const Login = () => {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [userData, setUserData] = useState(null);
-  const [marks, setMarks] = useState({
-    tamil: "",
-    english: "",
-    maths: "",
-    science: "",
-    social: "", 
-});
+ const [marks, setMarks] = useState([
+    { subject: "Tamil", score: "" },
+    { subject: "English", score: "" },
+    { subject: "Maths", score: "" },
+    { subject: "Science", score: "" },
+    { subject: "Social", score: "" }
+]);
+
 
     const [percentage, setPercentage] = useState(0);
     const navigate = useNavigate();
@@ -75,30 +76,21 @@ const handleLogin = async (e) => {
 };
 
 
-   const calculatePercentage = (marks) => {
-    const totalMarks = Object.values(marks)
-        .map(Number)  // Convert all to numbers
-        .filter(val => !isNaN(val));  // Remove NaN values
-
-    if (totalMarks.length === 0) {
-        setPercentage(0);
-        return;
-    }
-
-    const total = totalMarks.reduce((acc, val) => acc + val, 0);
-    const percentageValue = (total / (totalMarks.length * 100)) * 100;
+  const calculatePercentage = (marks) => {
+    const totalMarks = marks.reduce((acc, mark) => acc + (Number(mark.score) || 0), 0);
+    const percentageValue = (totalMarks / (marks.length * 100)) * 100;
     setPercentage(percentageValue.toFixed(2));
 };
 
 
-  const handleChange = (e) => {
-    const updatedMarks = { 
-        ...marks, 
-        [e.target.name]: Number(e.target.value)  // Convert to number
-    };
+
+ const handleChange = (index, value) => {
+    const updatedMarks = [...marks];
+    updatedMarks[index].score = value;
     setMarks(updatedMarks);
     calculatePercentage(updatedMarks);
 };
+
 
 
    const handleUpdateMarks = async (e) => {
@@ -195,22 +187,22 @@ const handleLogin = async (e) => {
             </tr>
         </thead>
         <tbody>
-            {Object.keys(marks).map((subject) => (
-                <tr key={subject}>
-                    <td>{subject.charAt(0).toUpperCase() + subject.slice(1)}</td>
-                    <td>
-                        <input 
-                            type="number" 
-                            className="marks-input" 
-                            name={subject} 
-                            value={marks[subject]} 
-                            onChange={handleChange} 
-                            placeholder="Enter marks"
-                            required 
-                        />
-                    </td>
-                </tr>
-            ))}
+           {marks.map((mark, index) => (
+    <tr key={index}>
+        <td>{mark.subject}</td>
+        <td>
+            <input 
+                type="number" 
+                className="marks-input" 
+                value={mark.score} 
+                onChange={(e) => handleChange(index, e.target.value)} 
+                placeholder="Enter marks"
+                required 
+            />
+        </td>
+    </tr>
+))}
+
         </tbody>
     </table>
     <h3 className="percentage">Total Percentage: {percentage}%</h3>
