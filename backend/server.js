@@ -14,7 +14,7 @@ const app = express();
 app.use(cors({
     origin: "https://mern-stack-1-xv17.onrender.com", // Allow only your frontend
     credentials: true, // Allow cookies and authentication headers
-    methods: ["POST"], // Allow these methods
+    methods: ["POST", "GET"], // Allow these methods
     allowedHeaders: ["Content-Type", "Authorization"] // Allow headers
 }));
 
@@ -161,7 +161,7 @@ app.post("/update-marks", async (req, res) => {
 });
 
 // ✅ Home Route
-app.post("/", (req, res) => {
+app.get("/", (req, res) => {
     res.json({ message: "Hello, server is running!" });
 });
 
